@@ -1,5 +1,10 @@
 {
-    "name": "",
-    "genre": "",
-    "seasons": ""
+    "series": [
+        {
+            "name": "Juego de Tronos",
+            "genre": "Ficción",
+            "seasons": "8"
+        }
+    ]
+    
 }
