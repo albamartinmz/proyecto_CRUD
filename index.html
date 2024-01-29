@@ -16,13 +16,16 @@
         </div>
         <div class="inputTask">
             <form>
-                <input id="todoInput" type="text" placeholder="Add a task..">
-                <button id="addButton" type="submit">&plus;</button>
+                <input id="seriesInput" type="text" placeholder="Nombre de la serie">
+                <input id="genreInput" type="text" placeholder="Género">
+                <input id="seasonsInput" type="number" placeholder="Número de temporadas">
+                <button id="addButton" type="button" onclick="addSeriesFromForm()">+ Agregar Serie</button>
+
             </form>
         </div>
         <div class="listMain">
             <div class="listDiv">
-                <ul id="todoList">
+                <ul id="seriesList">
                 </ul>
             </div>
         </div>

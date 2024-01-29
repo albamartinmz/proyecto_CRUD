@@ -1,112 +1,110 @@
-// Declaración de una variable llamada 'todos' que es un array vacío.
-let todos = [];
-
-// Función para agregar una tarea a la lista.
-function addTodo() {
-  // Obtiene el valor del input con el id 'todoInput'.
-    let inputValue = document.getElementById("todoInput").value;
-
-  // Agrega un objeto a la lista 'todos' con propiedades 'nombre' e 'id'.
-    todos.push({ nombre: inputValue, id: todos.length + 1 });
-
-  // Limpia el valor del input.
-    document.getElementById("todoInput").value = "";
-
-  // Muestra las tareas actualizadas.
-    showTodos();
+// Método GET R (read) del CRUD para obtener series.
+async function getSeries() {
+  const result = await fetch("http://localhost:3000/series");
+  const data = await result.json();
+  return data;
 }
 
-// Función para mostrar las tareas en la interfaz.
-function showTodos() {
-  // Obtiene el elemento con el id 'todoList'.
-    let list = document.getElementById("todoList");
+// Método DELETE D (delete) del CRUD para eliminar una serie.
+async function deleteSeriesById(element) {
+  try {
+      // Obtenemos el ID de la serie desde el atributo data-id del botón.
+      const id = element.getAttribute("data-id");
 
-  // Limpia el contenido de la lista.
-    list.innerHTML = "";
+      const result = await fetch(`http://localhost:3000/series/${id}`, {
+          method: "DELETE"
+      });
 
-  // Itera sobre todas las tareas en 'todos'.
-    for (let i = 0; i < todos.length; i++) {
-    // Obtiene la tarea actual.
-    let todo = todos[i];
+      if (result.ok) {
+          // Actualizamos la interfaz después de eliminar la serie.
+          showSeries();
+      } else {
+          console.error(`No se encontró la serie con ID ${id}`);
+      }
 
-    // Crea un nuevo elemento 'div' para cada tarea.
-    let div = document.createElement('div');
-    div.classList.add('todo-item');
-
-    // Crea un nuevo elemento 'li' para el nombre de la tarea.
-    let li = document.createElement('li');
-    li.textContent = todo.nombre;
-
-    // Crea un nuevo elemento 'div' para los botones de modificar y borrar.
-    let buttonsDiv = document.createElement('div');
-    buttonsDiv.classList.add('buttons-div');
-
-    // Crea un botón para modificar la tarea.
-    let modifyButton = document.createElement('button');
-    modifyButton.textContent = 'Modificar';
-    modifyButton.classList.add('modify-button');
-    // Añade un event listener para llamar a 'modifyTodoById' con el id de la tarea.
-    modifyButton.addEventListener('click', function() {
-        modifyTodoById(todo.id);
-    });
-
-    // Crea un botón para borrar la tarea.
-    let deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Borrar';
-    deleteButton.classList.add('delete-button');
-    // Añade un event listener para llamar a 'deleteTodoById' con el id de la tarea.
-    deleteButton.addEventListener('click', function() {
-        deleteTodoById(todo.id);
-    });
-
-    // Añade los botones al 'buttonsDiv'.
-    buttonsDiv.appendChild(modifyButton);
-    buttonsDiv.appendChild(deleteButton);
-
-    // Añade el nombre de la tarea y los botones al 'div'.
-    div.appendChild(li);
-    div.appendChild(buttonsDiv);
-
-    // Añade el 'div' a la lista.
-    list.appendChild(div);
-    }
+      return result;
+  } catch (error) {
+      console.error('Error:', error);
+  }
 }
 
-// Función para modificar una tarea por su id.
-function modifyTodoById(id) {
-  // Pide al usuario que ingrese el nuevo nombre de la tarea.
-    let newName = prompt("Ingresa el nuevo nombre para la tarea número: " + id);
-    if (newName) {
-    // Busca la tarea por su id y actualiza el nombre.
-    for (let i = 0; i < todos.length; i++) {
-        if (todos[i].id === id) {
-        todos[i].nombre = newName;
-        break;
-        }
-    }
-    // Muestra las tareas actualizadas.
-    showTodos();
-    }
+// Método POST C (create) del CRUD para agregar una nueva serie.
+async function addSeries(name, genre, seasons) {
+  const newSerie = {
+      "name": name,
+      "genre": genre,
+      "seasons": seasons
+  };
+
+  const options = {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newSerie),
+  };
+
+  const result = await fetch(`http://localhost:3000/series`, options);
+  // Actualizamos la interfaz después de agregar la serie.
+  showSeries();
+  return result;
 }
 
-// Función para borrar una tarea por su id.
-function deleteTodoById(id) {
-  // Busca la tarea por su id y la borra del array 'todos'.
-    for (let i = 0; i < todos.length; i++) {
-    if (todos[i].id === id) {
-        todos.splice(i, 1);
-        break;
-        }
-    }
-  // Muestra las tareas actualizadas.
-    showTodos();
+// Método PUT U (update) del CRUD para modificar una serie por su id.
+async function modifySeriesById(id) {
+  let newName = prompt("Ingresa el nuevo nombre para la serie número " + id);
+  if (newName) {
+      const result = await fetch(`http://localhost:3000/series/${id}`, {
+          method: 'PUT',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: newName }),
+      });
+      // Actualizamos la interfaz después de modificar la serie.
+      showSeries();
+      return result;
+  }
 }
 
-// Añade un event listener al botón con el id 'addButton' para llamar a 'addTodo'.
+// Método GET R (read) del CRUD para mostrar series.
+async function showSeries() {
+  let series = await getSeries();
+  seriesList.innerHTML = ""; // Limpiamos el contenido anterior.
+
+  series.map(serie => {
+      seriesList.innerHTML += `
+          <li>${serie.name} - ${serie.genre} (${serie.seasons} seasons)
+              <div class="buttons-div">
+                  <button class="modify-button" onclick="modifySeriesById(${serie.id})">Editar</button>
+                  <button class="delete-button" onclick="deleteSeriesById(this)" data-id="${serie.id}">Eliminar</button>
+              </div>
+          </li>
+      `;
+  });
+}
+
+// Manejador de eventos para el formulario de agregar serie.
 document.getElementById('addButton').addEventListener('click', function(event) {
-    event.preventDefault();
-    addTodo();
+  event.preventDefault(); // Evita que el formulario se envíe automáticamente.
+  addSeriesFromForm();
 });
 
-// Al cargar la ventana, muestra las tareas.
-window.onload = showTodos;
+function addSeriesFromForm() {
+  let name = document.getElementById("seriesInput").value;
+  let genre = document.getElementById("genreInput").value;
+  let seasons = document.getElementById("seasonsInput").value;
+
+  if (name && genre && seasons) {
+      addSeries(name, genre, seasons);
+      document.getElementById("seriesInput").value = "";
+      document.getElementById("genreInput").value = "";
+      document.getElementById("seasonsInput").value = "";
+  } else {
+      alert("Por favor, completa todos los campos.");
+  }
+}
+
+// Al cargar la ventana, obtenemos y mostramos las series.
+window.onload = showSeries;
+
